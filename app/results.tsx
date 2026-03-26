@@ -32,8 +32,10 @@ export default function Results() {
 
   const { detectedClass, resultImage, confidence } =
     GlobalResultStore.getResult();
-  const diagnosis =
-    DIAGNOSIS_DATA[detectedClass as string] || DIAGNOSIS_DATA["default"];
+
+  const diagnosisKey = detectedClass ? detectedClass.toLowerCase() : "default";
+
+  const diagnosis = DIAGNOSIS_DATA[diagnosisKey] || DIAGNOSIS_DATA["default"];
 
   const [activeTab, setActiveTab] = useState<"overview" | "repair">("overview");
   const scrollViewRef = useRef<ScrollView>(null);
@@ -184,7 +186,11 @@ export default function Results() {
 
           <View style={styles.iconContainer}>
             <Image
-              source={{ uri: resultImage || "https://placehold.co/400" }}
+              source={{
+                uri: resultImage
+                  ? `data:image/jpeg;base64,${resultImage}`
+                  : "https://placehold.co/400",
+              }}
               style={styles.detectedImage}
             />
           </View>
