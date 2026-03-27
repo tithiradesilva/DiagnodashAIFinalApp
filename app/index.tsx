@@ -91,7 +91,7 @@ export default function Index() {
   };
 
   const handleContinue = async () => {
-    const API_URL = "https://diagnodash-api.onrender.com/predict";
+    const API_URL = "https://diagnodash-server-final.onrender.com/predict";
     if (!image) return;
 
     setIsLoading(true);
@@ -107,7 +107,6 @@ export default function Index() {
       const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
-        // CRITICAL: No manual content-type header here to prevent boundary errors
       });
 
       const data = await response.json();
@@ -117,7 +116,7 @@ export default function Index() {
           image,
           data.detected_class,
           data.confidence,
-          data.result_image,
+          data.box,
         );
         router.push("/results");
       } else {

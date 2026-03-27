@@ -3,19 +3,19 @@ export const GlobalResultStore = {
     imageUri: null as string | null,
     detectedClass: null as string | null,
     confidence: 0 as number,
-    resultImage: null as string | null,
+    box: null as number[] | null, // Box coordinates
   },
 
   setResult(
     imageUri: string,
     detectedClass: string,
     confidence: number,
-    resultImage: string,
+    box: number[] | null, // Box array from the server
   ) {
     this.data.imageUri = imageUri;
     this.data.detectedClass = detectedClass;
     this.data.confidence = confidence;
-    this.data.resultImage = resultImage;
+    this.data.box = box;
   },
 
   getResult() {
@@ -27,7 +27,7 @@ export const GlobalResultStore = {
       imageUri: null,
       detectedClass: null,
       confidence: 0,
-      resultImage: null,
+      box: null,
     };
   },
 };

@@ -3,20 +3,20 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Image,
-    Linking,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Linking,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { DIAGNOSIS_DATA } from "./diagnosisData";
@@ -30,11 +30,38 @@ const USE_MOCK_DATA = false;
 export default function Results() {
   const router = useRouter();
 
-  const { detectedClass, resultImage, confidence } =
-    GlobalResultStore.getResult();
+  const result = GlobalResultStore.getResult();
+
+  // Safety Check: Use existing styles from your Results.tsx
+  if (!result || !result.detectedClass) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View
+          style={[
+            styles.container,
+            { justifyContent: "center", alignItems: "center", padding: 20 },
+          ]}
+        >
+          <Ionicons name="alert-circle-outline" size={80} color="#ccc" />
+          <Text style={[styles.bodyText, { marginBottom: 20, color: "#666" }]}>
+            No detection data found.
+          </Text>
+
+          {/* Using permissionButton style because it exists in this file */}
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={() => router.replace("/")}
+          >
+            <Text style={styles.permissionButtonText}>Go Back to Home</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const { imageUri, detectedClass, confidence, box } = result;
 
   const diagnosisKey = detectedClass ? detectedClass.toLowerCase() : "default";
-
   const diagnosis = DIAGNOSIS_DATA[diagnosisKey] || DIAGNOSIS_DATA["default"];
 
   const [activeTab, setActiveTab] = useState<"overview" | "repair">("overview");
@@ -184,15 +211,30 @@ export default function Results() {
         >
           <Text style={styles.pageTitle}>Detected Icon Details :</Text>
 
+          {/* <-- CHANGED: Client Side Rendering the local image and Bounding Box --> */}
           <View style={styles.iconContainer}>
             <Image
               source={{
-                uri: resultImage
-                  ? `data:image/jpeg;base64,${resultImage}`
-                  : "https://placehold.co/400",
+                uri: imageUri || "https://placehold.co/400",
               }}
               style={styles.detectedImage}
             />
+
+            {box && box.length === 4 && (
+              <View
+                style={{
+                  position: "absolute",
+                  left: box[0] * (160 / 512),
+                  top: box[1] * (160 / 512),
+                  width: (box[2] - box[0]) * (160 / 512),
+                  height: (box[3] - box[1]) * (160 / 512),
+                  borderWidth: 3,
+                  borderColor: colors.border,
+                  borderRadius: 4,
+                  backgroundColor: "rgba(0, 255, 0, 0.15)",
+                }}
+              />
+            )}
           </View>
 
           <Text style={styles.issueTitle}>{diagnosis.title}</Text>
