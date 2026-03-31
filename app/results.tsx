@@ -32,7 +32,7 @@ export default function Results() {
 
   const result = GlobalResultStore.getResult();
 
-  // Safety Check: Use existing styles from your Results.tsx
+  
   if (!result || !result.detectedClass) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -100,6 +100,7 @@ export default function Results() {
     }
   };
 
+  // Fetch nearby repair centers using TomTom API
   const fetchRepairCenters = async () => {
     setLoadingCenters(true);
     try {
@@ -126,13 +127,14 @@ export default function Results() {
       const radius = 3000;
       const limit = 5;
 
-      const url = `https://api.tomtom.com/search/2/search/${query}.json?key=${TOMTOM_API_KEY}&lat=${latitude}&lon=${longitude}&radius=${radius}&limit=${limit}`;
+      const url = `https://api.tomtom.com/search/2/search/${query}.json?key=${TOMTOM_API_KEY}&lat=${latitude}&lon=${longitude}&radius=${radius}&limit=${limit}`; // TomTom Search API endpoint
 
       console.log("Fetching TomTom Data...");
 
       const response = await fetch(url);
       const data = await response.json();
-
+      
+      // Format the results to match UI
       if (data.results) {
         const formattedResults = data.results.map((item: any) => ({
           id: item.id,
@@ -167,6 +169,7 @@ export default function Results() {
     }
   };
 
+  // Determine colors based on confidence level
   const getConfidenceColors = (percent: number) => {
     if (percent > 70) {
       return {
@@ -195,6 +198,7 @@ export default function Results() {
     }
   };
 
+  // Draw the bounding box on the image if available
   const renderContent = () => {
     if (activeTab === "overview") {
       const confidencePercent = Math.round((confidence || 0) * 100);
@@ -211,16 +215,16 @@ export default function Results() {
         >
           <Text style={styles.pageTitle}>Detected Icon Details :</Text>
 
-          {/* <-- CHANGED: Client Side Rendering the local image and Bounding Box --> */}
           <View style={styles.iconContainer}>
             <Image
               source={{
-                uri: imageUri || "https://placehold.co/400",
+                uri: imageUri || "https://placehold.co/400", // Fallback image if URI is null
               }}
               style={styles.detectedImage}
             />
 
             {box && box.length === 4 && (
+              // Scale the boxes down to fit the displayed size (160x160)
               <View
                 style={{
                   position: "absolute",
@@ -238,7 +242,8 @@ export default function Results() {
           </View>
 
           <Text style={styles.issueTitle}>{diagnosis.title}</Text>
-
+          
+          
           <View
             style={[
               styles.confidenceBadge,

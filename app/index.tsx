@@ -61,7 +61,7 @@ export default function Index() {
     if (!result.canceled) {
       const selectedAsset = result.assets[0];
 
-      // --- LOGIC: ZOOM VALIDATION ---
+      // Zoom level check - if the image is too wide, prompt user to zoom in more
       if (selectedAsset.width > 2000) {
         Alert.alert(
           "Zoom In More",
@@ -70,15 +70,15 @@ export default function Index() {
         );
         return;
       }
-
-      // --- LOGIC: ON-DEVICE RESIZE (512x512) ---
+      
+      // Resize the image to 512x512
       try {
         const manipulatedImage = await ImageManipulator.manipulateAsync(
           selectedAsset.uri,
           [{ resize: { width: 512, height: 512 } }],
           { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG },
         );
-        setImage(manipulatedImage.uri);
+        setImage(manipulatedImage.uri);   // Use the resized image URI
       } catch (error) {
         console.error("Error resizing image:", error);
         setImage(selectedAsset.uri);
@@ -90,12 +90,14 @@ export default function Index() {
     setImage(null);
   };
 
+  // Handle the continue button press and the endpoint call to the AI server
   const handleContinue = async () => {
-    const API_URL = "https://diagnodash-server-final.onrender.com/predict";
+    const API_URL = "https://diagnodash-server-final.onrender.com/predict"; // Endpoint
     if (!image) return;
 
-    setIsLoading(true);
+    setIsLoading(true); // Show loading indicator
 
+    // Prepare the image for upload
     const formData = new FormData();
     formData.append("file", {
       uri: image,
@@ -103,21 +105,24 @@ export default function Index() {
       type: "image/jpeg",
     } as any);
 
+    // Send to the server
     try {
       const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
       });
 
+      // Check if the response is OK
       const data = await response.json();
-
+      
+      // Handle the response from the server
       if (data.success) {
         GlobalResultStore.setResult(
           image,
           data.detected_class,
           data.confidence,
           data.box,
-        );
+        ); // Store the result in the global store
         router.push("/results");
       } else {
         Alert.alert(
